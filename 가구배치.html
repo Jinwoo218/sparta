@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>가구 배치 도면</title>
+    <style>
+        #room {
+            width: 1200px;
+            height: 600px;
+            background-color: white;
+            border: 1px solid black;
+            position: relative;
+        }
+
+        .furniture, .desk, .chair {
+            position: absolute;
+            cursor: move;
+            border: 1px solid black;
+        }
+
+        .desk {
+            background-color: rgb(42, 42, 31);
+            color: white;
+            text-align: center;
+            line-height: 40px;
+        }
+
+        .desk-g {
+            width: 180px;
+            height: 120px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 66.7% 100%, 66.7% 50%, 0 50%);
+        }
+
+        .desk-g-reverse {
+            width: 180px;
+            height: 120px;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 33.3% 50%, 33.3% 100%, 0 100%);
+        }
+
+        .desk-mirrored {
+            width: 180px;
+            height: 120px;
+            clip-path: polygon(0 0, 66.7% 0, 66.7% 50%, 33.3% 50%, 33.3% 100%, 100% 100%, 100% 0);
+        }
+
+        .desk-mirrored-reverse {
+            width: 180px;
+            height: 120px;
+            clip-path: polygon(0 0, 33.3% 0, 33.3% 50%, 100% 50%, 100% 100%, 0 100%);
+        }
+
+        .chair {
+            width: 65.5px;
+            height: 65.5px;
+            background-color: green;
+            border-radius: 50%;
+            color: black;
+            text-align: center;
+            line-height: 65.5px;
+        }
+
+        .table-6 {
+            width: 240px;
+            height: 95px;
+            background-color: brown;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
+        .table-8 {
+            width: 320px;
+            height: 95px;
+            background-color: brown;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
+        .table-3 {
+            width: 180px;
+            height: 120px;
+            background-color: blue;
+            clip-path: polygon(0 0, 66.7% 0, 66.7% 50%, 66.7% 50%, 100% 100%, 0 100%);
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
+        .table-4 {
+            width: 180px;
+            height: 120px;
+            background-color: red;
+            clip-path: polygon(0 0, 33.3% 0, 33.3% 50%, 100% 50%, 100% 100%, 0 100%);
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+    </style>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div>
+        <label for="width">가로(mm):</label>
+        <input type="number" id="width" name="width" value="12000">
+        <label for="height">세로(mm):</label>
+        <input type="number" id="height" name="height" value="6000">
+        <button onclick="updateRoomSize()">적용</button>
+    </div>
+
+    <div>
+        <button onclick="createFurniture('desk1')">책상1</button>
+        <button onclick="createFurniture('desk2')">책상2</button>
+        <button onclick="createFurniture('desk3')">책상3</button>
+        <button onclick="createFurniture('desk4')">책상4</button>
+        <button onclick="createFurniture('chair')">의자</button>
+        <button onclick="createFurniture('table6')">6인회의테이블</button>
+        <button onclick="createFurniture('table8')">8인회의테이블</button>
+        <button onclick="removeAllFurniture()">가구삭제</button>
+        <button onclick="exportAsImage()">내보내기</button>
+    </div>
+
+    <div id="room"></div>
+
+    <script>
+        var container = document.getElementById("room");
+        var active = false;
+        var currentX;
+        var currentY;
+        var initialX;
+        var initialY;
+        var xOffset = 0;
+        var yOffset = 0;
+
+        container.addEventListener("mousedown", dragStart, false);
+        container.addEventListener("mouseup", dragEnd, false);
+        container.addEventListener("mousemove", drag, false);
+
+        function dragStart(e) {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+
+            if (e.target.classList.contains("furniture")) {
+                active = true;
+                dragItem = e.target;
+            }
+        }
+
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            active = false;
+        }
+
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                setTranslate(currentX, currentY, dragItem);
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        }
+
+        function updateRoomSize() {
+            var widthInput = document.getElementById("width").value;
+            var heightInput = document.getElementById("height").value;
+            var widthPx = widthInput / 10;
+            var heightPx = heightInput / 10;
+            container.style.width = widthPx + "px";
+            container.style.height = heightPx + "px";
+        }
+
+        function createFurniture(type) {
+            var newFurniture;
+            if (type === 'desk1') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk desk-g';
+                newFurniture.textContent = '책상';
+            } else if (type === 'desk2') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk desk-g-reverse';
+                newFurniture.textContent = '책상';
+            } else if (type === 'desk3') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk desk-mirrored';
+                newFurniture.textContent = '책상';
+            } else if (type === 'desk4') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk desk-mirrored-reverse';
+                newFurniture.textContent = '책상';
+            } else if (type === 'chair') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture chair';
+                newFurniture.textContent = '의자';
+            } else if (type === 'table6') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk table-6';
+                newFurniture.textContent = '6인회의테이블';
+            } else if (type === 'table8') {
+                newFurniture = document.createElement('div');
+                newFurniture.className = 'furniture desk table-8';
+                newFurniture.textContent = '8인회의테이블';
+            }
+
+            if (newFurniture) {
+                container.appendChild(newFurniture);
+                newFurniture.addEventListener("mousedown", dragStart, false);
+            }
+        }
+
+        function removeAllFurniture() {
+            var furnitureItems = document.querySelectorAll('.furniture');
+            furnitureItems.forEach(function(item) {
+                container.removeChild(item);
+            });
+        }
+
+        function exportAsImage() {
+            html2canvas(document.getElementById('room')).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'room-layout.jpg';
+                link.href = canvas.toDataURL('image/jpg');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
